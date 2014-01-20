@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html class=" js flexbox canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms no-csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths"
+      style=""><!--<![endif]-->
+
+<!-- Jinja global macros-->
+{% macro get_static_url(sub_folder, file_name) -%}
+    {{ url_for("static", filename="%s/%s" % (sub_folder, file_name) ) }}
+{%- endmacro %}
+
+{% macro get_js_file(file_name) -%}
+    {% set url = get_static_url("libs", file_name) %}
+    <script type="text/javascript" src="{{ url }}"></script>
+{%- endmacro %}
+
+{% macro get_css_file(file_name) -%}
+    {% set url = get_static_url("css", file_name) %}
+    <link rel="stylesheet" type="text/css" href="{{ url }}">
+{%- endmacro %}
+
+{% macro get_image_file(file_name, alt_s="", click_event="") -%}
+    {% set url = get_static_url("imgs", file_name) %}
+    <img src="{{url}}" alt="{{alt_s}}" onclick="{{click_event}}">
+{%- endmacro %}
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="">
+
+
+    <title>TingDB: MongoDB on the Cloud</title>
+    <!--<link rel="icon" type="image/ico" href="http://labs.bittorrent.com/img/favicon.ico">-->
+
+    <!--<link rel="stylesheet" href="./index_files/style.fonts.css" type="text/fonts.css">-->
+    {{ get_css_file("fonts.css") }}
+    {{ get_css_file("custom_styles.css") }}
+    {{ get_css_file("style.css") }}
+
+    <!--<link rel="stylesheet" href="./index_files/prettify.fonts.css" type="text/fonts.css">-->
+    <!--<link rel="stylesheet" href="./index_files/fonts.css" type="text/fonts.css">-->
+    <!-- FOR RESPONSIVE <link href="bootstrap/fonts.css/responsive.fonts.css" rel="stylesheet"> -->
+
+    <!--<script type="text/javascript" src="./index_files/dc.js"></script>-->
+    <!--<script src="./index_files/modernizr-2.6.2-respond-1.1.0.min.js"></script>-->
+    <!--<script src="./index_files/jquery-1.9.1.min.js"></script>-->
+    <!--<script src="./index_files/jssor.slider.min.js"></script>-->
+    <!--<script src="./index_files/bootstrap.min.js"></script>-->
+    <!--<script src="./index_files/prettify.js"></script>-->
+
+    <!--{{ get_js_file("dc.js") }}-->
+    <!--{{ get_js_file("modernizr-2.6.2-respond-1.1.0.min.js") }}-->
+    {{ get_js_file("jquery-1.9.1.min.js") }}
+    {{ get_js_file("bootstrap.min.js") }}
+    {{ get_css_file("alertify.core.css") }}
+    {{ get_css_file("alertify.bootstrap.css") }}
+    {{ get_js_file("alertify.min.js") }}
+    <!--{{ get_js_file("jquery.bpopup.min.js") }}-->
+</head>
+
+<body>
+<!--[if lt IE 7]>
+<p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to
+    improve your experience.</p>
+<![endif]-->
+
+<header>
+    <div class="top">
+        <div class="container">
+            <nav class="navbar">
+                <div>
+                    <a class="brand" href="../index">
+                        {{ get_image_file('ting_oracle.gif', "Ting Oracle") }}
+                    </a>
+
+                    <h1 style="float: left; margin-top: 30px">TingDB Web Service</h1>
+                    <ul class="nav pull-right">
+                        <li><a href=""><span>PLANS</span></a></li>
+                        <li><a href=""><span>DEVELOPER TOOLS</span></a></li>
+                        <li><a data-toggle="modal" href="#AboutUsDialog"><span>ABOUT US</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+            <hr>
+        </div>
+        <!-- /container -->
+    </div>
+    <!-- /top -->
+</header>
+
+{% block content %}{% endblock %}
+
+<!--/// FOOTER ///-->
+<div id="footer" class="home_body">
+    Designed by <a href="http://www.cse.ust.hk/~richardxx" target="_blank">richardxx</a>
+
+    <div class="footerhr">
+        <hr>
+    </div>
+    Built with <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a>,
+    powered by <a href="http://flask.pocoo.org/" target="_blank"> Flask </a>
+</div>
+<!-- /footer -->
+
+
+<!-- Heavy loading work goes here, after the content is loaded-->
+<!-- Prepare invisible text information-->
+<div id="AboutUsDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="windowTitleLabel" aria-hidden="true">
+    <div class="modal-header">
+        <a href="#" class="close" data-dismiss="modal">&times;</a>
+        <h3>Please enter a new title for this window.</h3>
+    </div>
+    <div class="modal-body">
+        <div class="divDialogElements">
+            <input class="xlarge" id="xlInput" name="xlInput" type="text" />
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn" onclick="closeDialog ();">Cancel</a>
+        <a href="#" class="btn btn-primary" onclick="okClicked ();">OK</a>
+    </div>
+</div>
+
+
+
+<!-- Setup the scripting functions for showing the about dialog-->
+<script>
+    $(document).ready(function() {
+        $('#AboutUsDialog').bind('show', function () {
+            document.getElementById ("xlInput").value = document.title;
+        });
+    });
+
+    function closeDialog () {
+        $('#AboutUsDialog').modal('hide');
+    };
+
+    function okClicked () {
+        document.title = document.getElementById ("xlInput").value;
+        closeDialog ();
+    };
+</script>
+
+<!-- Scripts for common functions-->
+<script>
+    function popup_not_imp_yet()
+    {
+        alertify.error("Sorry, not implemented yet.");
+    }
+</script>
+
+</body>
+</html>

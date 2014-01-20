@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link href='http://fonts.googleapis.com/css?family=Stalinist+One' rel='stylesheet' type='text/css'>
+
+<div style="text-align:center;">
+    <div class="home_body" style="display: inline-block;">
+        <h1 style="font-family: 'Stalinist One', cursive;">Choose a command:</h1>
+        <hr>
+
+        <div class="row" style="margin-left: auto; margin-right: auto; display: block; width: 80%">
+            <div class="panel_box panel panel-info">
+                <div class="panel-heading">Create Database</div>
+                <div class="panel-body">
+                    <a href="createdb">
+                        {{ get_image_file('newDB.png', "Create Database") }}
+                        <!--<img src="{{ get_static_url('imgs', 'newDB.png') }}" alt="Create Database">-->
+                    </a>
+                </div>
+            </div>
+            <!-- Create DB Panel -->
+
+            <div class = "panel_box panel panel-info">
+                <div class="panel-heading">Manage Database</div>
+                <div class="panel-body">
+                    <a href="managedb">
+                        {{ get_image_file('configDB.png', "Manage Database") }}
+                        <!--<img src="{{ get_static_url('imgs', 'configDB.png') }}" alt="Manage Database">-->
+                    </a>
+                </div>
+            </div>
+            <!-- DB management Panel -->
+
+            <div class = "panel_box panel panel-info">
+                <div class="panel-heading">Monitor Database</div>
+                <div class="panel-body">
+                    {{ get_image_file('monitorDB.png', "Monitor Database", "popup_not_imp_yet()") }}
+                    <!--<img src="{{ get_static_url('imgs', 'monitorDB.png') }}" alt="Monitor Database">-->
+                </div>
+            </div>
+            <!-- monitor DB Panel -->
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

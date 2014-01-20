@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+    <li>{{ message }} </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+{{ get_js_file("jssor.slider.min.js") }}
+
+<div class="home_body">
+    <div id="slider1_container"
+         style="margin: 10px auto auto auto; position: relative; top: 0px; left: 0px; width: 768px; height: 432px;">
+        <!-- Slides Container -->
+        <div u="slides"
+             style="cursor: move; position: absolute; left: 0px; top: 0px; overflow: hidden; width: 768px; height: 432px;">
+            {% set day_names = ["january", "feburary", "march", "april", "may", "june", "july", "august", "september",
+            "october", "november", "december"] %}
+            {% for day in day_names %}
+            {% set img_file = get_static_url('imgs/ust_calendar', '%s.jpg' % day) %}
+            <div><img u="image" src="{{ img_file }}"/></div>
+            {% endfor %}
+
+            <!--<div><img u="image" src="./index_files/ust_calendar/january.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/feburary.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/march.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/april.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/may.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/june.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/july.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/august.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/september.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/october.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/november.jpg"/></div>-->
+            <!--<div><img u="image" src="./index_files/ust_calendar/december.jpg"/></div>-->
+        </div>
+    </div>
+
+    <script>
+        var _SlideshowTransitions = [
+                    //Fade
+                    {$Duration: 700, $Opacity: 2, $Brother: { $Duration: 1000, $Opacity: 2} }
+                ];
+
+                jQuery(document).ready(function ($) {
+                    var options = {
+                        $DragOrientation: 3, //[Optional] Orientation to drag slide, 0 no drag, 1 horizental, 2 vertical, 3 either, default value is 1 (Note that the $DragOrientation should be the same as $PlayOrientation when $DisplayPieces is greater than 1, or parking position is not 0)
+                        $AutoPlay: true, //[Optional] Whether to auto play, to enable slideshow, this option must be set to true, default value is false
+                        $AutoPlayInterval: 1500, //[Optional] Interval (in milliseconds) to go for next slide since the previous stopped if the slider is auto playing, default value is 3000
+                        $SlideshowOptions: { //[Optional] Options to specify and enable slideshow or not
+                            $Class: $JssorSlideshowRunner$, //[Required] Class to create instance of slideshow
+                            $Transitions: _SlideshowTransitions, //[Required] An array of slideshow transitions to play slideshow
+                            $TransitionsOrder: 1, //[Optional] The way to choose transition to play slide, 1 Sequence, 0 Random
+                            $ShowLink: true //[Optional] Whether to bring slide link on top of the slider when slideshow is running, default value is false
+                        }
+                    };
+
+                    var jssor_slider1 = new $JssorSlider$("slider1_container", options);
+                });
+    </script>
+
+    <!--Insert a form for fast login-->
+    <form name="login" class="form-inline" role="form" method="post"
+          style="margin-top: 30px; text-align: center">
+        <fieldset>
+            <legend></legend>
+            {{form.hidden_tag()}}
+            <div class="form-group">
+                {{form.userNameInputBox(class="form-control", placeholder="User name")}}
+                <!--<input type="email" class="form-control" id="email_box" name="email" placeholder="Enter email">-->
+            </div>
+            &nbsp&nbsp
+            <div class="form-group">
+                {{form.passwordInputBox(class="form-control", placeholder="Password")}}
+                <!--<input type="password" class="form-control" id="password_box" name="password" placeholder="Password">-->
+            </div>
+            <!--<div class="checkbox">-->
+            <!--<input type="checkbox" style="margin-left: 17px; height: 100%"> Remember me-->
+            <!--</div>-->
+            <input type="submit" class="btn btn-default form-control" name="signin" value="Sign in"
+                   style="margin: -5px -2px 0px 23px">
+            <input type="submit" class="btn btn-default form-control" name="register" value="Register"
+                   style="margin: -5px 0px 0px 0px">
+        </fieldset>
+    </form>
+
+</div>
+
+{% endblock %}

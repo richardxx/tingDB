@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link href='http://fonts.googleapis.com/css?family=Eagle+Lake|Covered+By+Your+Grace|Courgette' rel='stylesheet' type='text/css'>
+
+<div >
+    <div class="home_body">
+        <div style="margin: auto 10px 10px 10px;">
+            <h1 style="font-family: 'Eagle Lake', cursive;">Create a new subscription:</h1>
+            <hr style="border-style: dashed">
+
+            <h3 style="font-family: 'Courgette', cursive;">Location:</h3>
+            <p> We are now on the chcpuX servers.</p>
+            <hr>
+
+            <h3 style="font-family: 'Courgette', cursive;">Plan:</h3>
+
+            <div style="margin-left: auto; margin-right: auto; width: 80%">
+                <ul class="nav nav-tabs" id="planTab">
+                    <li class="active"><a href="#single_server">Single Server</a></li>
+                    <li><a href="#replica_server">Replica Server</a></li>
+                    <li><a href="#sharding_server">Sharding Server</a></li>
+                    <li><a href="#replica_sharding_server">Relica+Sharding Server</a></li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="single_server">
+                        <div class="plans">
+                            <div id="shared_single" class="plan">
+                                <span class="name" style="">Shared</span>
+                                <span class="ram">Shared</span>
+                                <span class="price">$10/month</span>
+                            </div>
+                            <!--<div id="standalone_single" class="plan">-->
+                                <!--<span class="name" style="">Standalone</span>-->
+                                <!--<span class="ram">Standalone</span>-->
+                                <!--<span class="price">$100/month</span>-->
+                            <!--</div>-->
+                        </div>
+                        <!-- Plans for single server-->
+                    </div>
+                    <div class="tab-pane" id="replica_server">
+                        <div class="plans">
+                            <div id="replica_plan" class="plan">
+                                <span class="name" style="">Shared</span>
+                                <span class="ram">Shared</span>
+                                <span class="price">$10/month</span>
+                            </div>
+                        </div>
+                        <!-- Plans for replica server-->
+                    </div>
+                    <div class="tab-pane" id="sharding_server">
+                        <div class="plans">
+                            <div id="sharding_plan" class="plan">
+                                <span class="name" style="">Shared</span>
+                                <span class="ram">Shared</span>
+                                <span class="price">$10/month</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="replica_sharding_server">
+                        <div class="plans">
+                            <div id="replica_sharding_plan" class="plan">
+                                <span class="name" style="">Shared</span>
+                                <span class="ram">Shared</span>
+                                <span class="price">$10/month</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <!-- End of plan-->
+
+            <h3 style="font-family: 'Courgette', cursive;">Storage:</h3>
+            <hr>
+
+            <h3 style="font-family: 'Courgette', cursive;">Database Name:</h3>
+            <div class="input-group">
+                <input id="db_name" type="text" class="form-control" style="width: 300px" placeholder="Database name">
+            </div>
+            <hr>
+
+            <div style="clear: both; width: 100%; display: inline-block">
+                <div id="create_btn" class="btn btn-default btn-large" style="min-width: 100px; float: right">Create</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function(){
+        $('#planTab a').click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+    });
+
+    $(document).ready(function() {
+        // It's a jquery object
+        var selected_plan = null;
+
+        function select_plan() {
+            if (selected_plan != null) {
+                // We first cancel the selection of previous plan
+                if (selected_plan.hasClass("selected"))
+                    selected_plan.removeClass("selected");
+            }
+            selected_plan = $(this);
+            selected_plan.addClass("selected");
+        }
+
+        function create_subscription()
+        {
+            if ( select_plan == null ) {
+                alertify.error("Please select a plan first.");
+                return;
+            }
+
+            database_name = $("#db_name").val();
+            if ( database_name == "" ) {
+                alertify.error("Please specify the database name.");
+                return;
+            }
+
+            // The plan configuration
+            // Default is the shared single plan
+            var plan_options = {
+                db_name: database_name,
+                max_disk_size: 5,
+                type: "single",
+                replica_set: {arbiter: false, members: 2},
+                shard_cluster: {configs: 1, members: 1, shards: 2, shards_type: "single"}
+            };
+
+            switch (selected_plan.attr("id")) {
+                case "shared_single":
+                    break;
+
+                case "replica_plan":
+                    plan_options.max_disk_size = 200;
+                    plan_options.type = "replicaset";
+                    break;
+
+                case "sharding_plan":
+                    plan_options.max_disk_size = 500;
+                    plan_options.type = "shard_cluster";
+                    break;
+            }
+
+            // Ajax handler
+            $.post("dbops_new", plan_options,
+                function (data, textStatus, jqXHR) {
+                    try {
+//                        var response = JSON.parse(data);
+                        var response = data
+                        alert(response)
+
+                        if (response == "ok") {
+                            alertify.alert("Create database successfully.");
+                            window.location.href = "managedb";
+                        }
+                        else if (response == "lost") {
+                            // In case the connection is broken
+                            window.location.href = "../index.html"
+                        }
+                        else if (response == "fail") {
+                            alertify.alert("Failed to create database. Try it again later.");
+                        }
+                        else {
+
+                        }
+                    }
+                    catch (err) {
+                        alertify.error("Something wrong with the server..");
+                    }
+                }
+            , "json");
+        }
+
+        $(".plans .plan").click(select_plan);
+        $("#create_btn").click(create_subscription);
+    });
+</script>
+
+<style>
+
+</style>
+{% endblock %}
