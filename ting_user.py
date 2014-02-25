@@ -7,7 +7,7 @@ __author__ = 'richardxx'
 from flask.ext.wtf import Form
 from wtforms import TextField, PasswordField
 from wtforms.validators import Required, Length
-import service
+import tingDB_service
 import utils
 
 
@@ -34,7 +34,7 @@ class TingUser(Form):
     def do_login(self):
         if not self.__has_logged():
             try:
-                db = service.get_config_db()
+                db = tingDB_service.get_config_db()
                 users = db["users"]
                 users = users.find({"name": self.__username})
 
@@ -62,7 +62,7 @@ class TingUser(Form):
     def do_register(self):
         if not self.__has_logged():
             try:
-                db = service.get_config_db()
+                db = tingDB_service.get_config_db()
                 users = db["users"]
 
                 # Prepare for user record

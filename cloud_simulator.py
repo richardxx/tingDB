@@ -5,14 +5,14 @@
 __author__ = 'richardxx'
 
 import globals
-import service
+import tingDB_service
 
 # __hosts = ["chcpu1", "chcpu3", "chcpu5", "chcpu9"]
 __hosts = ["localhost"]
 
 
 def test_hosts_integrity():
-    hosts_collection = service.get_config_collection("hosts")
+    hosts_collection = tingDB_service.get_config_collection("hosts")
     for hostname in __hosts:
         host = hosts_collection.find({"hostname": hostname})
         if host.count() == 0:
@@ -25,7 +25,7 @@ def load_hosts():
     """
         Import hard coded hosts.
     """
-    hosts_collection = service.get_config_collection("hosts")
+    hosts_collection = tingDB_service.get_config_collection("hosts")
 
     for h in __hosts:
         record = {

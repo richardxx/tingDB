@@ -1,13 +1,13 @@
 """
-    It determines how and where to create a mongodb server instance.
+    This module takes charges of creating DB plans.
     By richardxx, 2014.1
 """
 __author__ = 'richardxx'
 
 
-import service
+import tingDB_service
 import plan_query
-
+import time
 
 # Generated sub-plans are cached in the queue
 __servers_queue = []
@@ -71,7 +71,7 @@ def get_collection_name_for_plan_type(plan_type):
 
 
 ###########################################################################
-#####  Module private functions ###########################################
+###############  Module private functions #################################
 ###########################################################################
 def __synthesize_single_server(username, server_type="normal"):
     """
@@ -98,7 +98,7 @@ def __synthesize_single_server(username, server_type="normal"):
 
     # Currently, we don't have support for opening standalone service
     # All services are shared on our machines
-    hostname, port = service.get_available_host(username)
+    hostname, port = tingDB_service.get_available_host(username)
     if port == -1: return None
 
     cmdOptions["port"] = port
@@ -211,6 +211,9 @@ def __create_dbref_for_server(username, server_type="normal"):
 
 
 def __create_dbref_for_replicaset(username, replicaset_options):
+    """
+        Built a DBRef to a newly created replicaset.
+    """
     cluster_ref = {
         "server": {
             "$ref": "clusters",
@@ -224,6 +227,9 @@ def __create_dbref_for_replicaset(username, replicaset_options):
 
 
 def __save_plan(plan_name, username, max_disk_size, plan_type):
+    """
+        Save the generated plan to database.
+    """
     try:
         plan_doc = {
             "_id": plan_name,
@@ -233,7 +239,7 @@ def __save_plan(plan_name, username, max_disk_size, plan_type):
             "status": "offline"
         }
 
-        plans_collection = service.get_config_collection("plans")
+        plans_collection = tingDB_service.get_config_collection("plans")
         plans_collection.insert(plan_doc)
 
     except Exception, e:
@@ -245,7 +251,7 @@ def __save_plan(plan_name, username, max_disk_size, plan_type):
 def __register_server(server_doc, _type):
     """
         We put this server descriptor into our servers queue.
-        We will commit all the servers in a batch.
+        We will commit all the servers in one run.
         "type" could only be: servers and clusters.
     """
     global __servers_queue
@@ -258,10 +264,10 @@ def __register_server(server_doc, _type):
 
 def __save_servers():
     """
-        Store all the plan instances into database.
+        Save the plan instances into database.
     """
     global __servers_queue
-    config_db = service.get_config_db()
+    config_db = tingDB_service.get_config_db()
 
     for plan in __servers_queue:
         plan_doc = plan["server_doc"]

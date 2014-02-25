@@ -8,11 +8,10 @@ from flask import Flask
 from flask import url_for, redirect
 from flask import render_template
 from flask import request
-import json
 import ting_user
 import plan_composer
-import service
-import signal
+import tingDB_service
+import plan_query
 
 
 app = Flask("__name__")
@@ -61,7 +60,10 @@ def show_managedb_page(username):
     if ting_user.find_user(username) is None:
         return redirect("/")
 
-    return render_template("managedb.html", userName=username)
+    # We first get the list of URIs
+    URIs = plan_query.get_URIs_for_user(username)
+    n_uris = len(URIs)
+    return render_template("managedb.html", userName=username, URIs=URIs, n_uris=n_uris)
 
 
 @app.route('/<username>/dbops_new', methods=['POST'])
@@ -76,18 +78,13 @@ def dbops_new(username):
 ###########################################################################
 #####  Module bootstrap functions #########################################
 ###########################################################################
-def sigint_handler(signal, frame):
-    print "You press CTRL+C to terminate this program"
-    service.shutdown_service()
-    exit(0)
-
 
 if __name__ == "__main__":
-    if service.init_service() is False:
-        sys.exit(-1)
+    if tingDB_service.init_service() is True:
+        # Start web server
+        app.run(port=tingDB_service.__ting_service_port)
 
-    signal.signal(signal.SIGINT, sigint_handler)
+        # Perhaps this is unreachable at all
+        tingDB_service.shutdown_service()
 
-    app.run(port=service.__ting_service_port)
-    service.shutdown_service()
 

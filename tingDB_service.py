@@ -1,17 +1,19 @@
 """
-    Manage computing resources and handle the connections to operation server.
+    Entry point for the tingDB service.
+    It manages computing resources and handle the connections to operation server.
     by richardxx, 2014.1
 """
 __author__ = 'richardxx'
 
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-import plan_composer
+import plan_query
 import globals
 import cloud_simulator
 import time
 import httplib
 import urllib
+import signal
 
 
 # host address for this TingDB service
@@ -62,10 +64,14 @@ def init_service():
         __clear_service_db()
         cloud_simulator.load_hosts()
 
+    __setup_handlers();
     return True
 
 
 def shutdown_service():
+    """
+        Close the tingDB service.
+    """
     global __service_conn
     global __service_config_db
 
@@ -171,7 +177,7 @@ def return_port(host, port):
     return True
 
 
-def send_request_to_op(plan_name, command = "op-start", _type = "servers"):
+def send_request_to_op(plan_name, command, _type = "servers"):
     """
         Send commands to operation server.
     """
@@ -188,13 +194,14 @@ def send_request_to_op(plan_name, command = "op-start", _type = "servers"):
         conn = httplib.HTTPConnection(get_service_ops_address())
         conn.request("POST", "/" + command, params, headers)
 
-        # Perhaps the operational service is down due to errors
+        # Perhaps the operation server is down due to errors
+        # Therefore, we need a timeout test
         conn.sock.settimeout(5.0)
         response = conn.getresponse()
         ret_data = response.read()
 
     except Exception, e:
-        print "Perhaps the operational service is not on."
+        print "Perhaps the operation service is off. Please turn it on first"
 
     return ret_data
 
@@ -204,12 +211,12 @@ def send_request_to_op(plan_name, command = "op-start", _type = "servers"):
 ###########################################################################
 
 def __open_service_db():
-    ret_data = plan_composer.start_plan(__ting_service_db_name)
+    ret_data = plan_query.start_plan(__ting_service_db_name)
     return ret_data is not ""
 
 
 def __close_service_db():
-    ret_data = plan_composer.stop_plan(__ting_service_db_name)
+    ret_data = plan_query.stop_plan(__ting_service_db_name)
     return ret_data is not ""
 
 
@@ -223,3 +230,13 @@ def __clear_service_db():
         if col_name in collection_names:
             col = __service_config_db[col_name]
             col.remove()
+
+
+def __setup_handlers():
+     signal.signal(signal.SIGINT, __sigint_handler)
+
+
+def __sigint_handler(signal, frame):
+    print "You press CTRL+C to terminate this program"
+    shutdown_service()
+    exit(0)
