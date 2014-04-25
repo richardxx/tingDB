@@ -22,7 +22,6 @@ class TingUser(Form):
     __password = ""
     __privilege = ""
 
-
     def obtain_user_input(self):
         if self.validate_on_submit():
             self.__username = self.userNameInputBox.data
@@ -32,58 +31,68 @@ class TingUser(Form):
         return False
 
     def do_login(self):
-        if not self.__has_logged():
-            try:
-                db = tingDB_service.get_config_db()
-                users = db["users"]
-                users = users.find({"name": self.__username})
-
-                # results is in the type of Cursor
-                if users.count() == 1:
-                    user = users.next()
-                    raw_password = self.__password
-                    encrypted_password = utils.encrypt_string(raw_password)
-
-                    if user["password"] == encrypted_password:
-                        register_user(self)
-                        return True
-
-                    self.__privilege = user["privilege"]
-            except Exception, e:
-                # Connect to database failed
-                print e.message
-
-        return False
-
-    def do_logout(self):
         if self.__has_logged():
-            self.__username = ""
+            return True, "Logged"
 
-    def do_register(self):
-        if not self.__has_logged():
-            try:
-                db = tingDB_service.get_config_db()
-                users = db["users"]
+        try:
+            db = tingDB_service.get_config_db()
+            users = db["users"]
+            users = users.find({"name": self.__username})
 
-                # Prepare for user record
+            # results is in the type of Cursor
+            if users.count() == 1:
+                user = users.next()
                 raw_password = self.__password
                 encrypted_password = utils.encrypt_string(raw_password)
 
-                new_user = {
-                    "name": self.__username,
-                    "password": encrypted_password,
-                    "privilege": "normal"
-                }
+                if user["password"] == encrypted_password:
+                    register_user_cache(self)
+                    return True, "Corrected"
 
-                users.insert(new_user)
-                register_user(self)
+                self.__privilege = user["privilege"]
+        except Exception, e:
+            # Connect to database failed
+            print e.message
 
-                return True
-            except Exception, e:
-                print e.message
-                # TODO: open the user records server
+        return False, "Wrong user name or password."
 
-        return False
+    def do_logout(self):
+        if self.__has_logged():
+            remove_user_cache(self)
+
+    def do_register(self):
+        if self.__has_logged():
+            # We directly let that user log in
+            return True, "Logged"
+
+        try:
+            db = tingDB_service.get_config_db()
+            users = db["users"]
+
+            # We first lookup if the user has been registered
+            user_cursor = users.find({"name": self.__username})
+            if user_cursor.count() > 0:
+                return False, "This user name has been registered."
+
+            # Prepare for user record
+            raw_password = self.__password
+            encrypted_password = utils.encrypt_string(raw_password)
+
+            new_user = {
+                "name": self.__username,
+                "password": encrypted_password,
+                "privilege": "normal"
+            }
+
+            users.insert(new_user)
+            register_user_cache(self)
+
+            return True, "Register successfully."
+        except Exception, e:
+            print e.message
+            # TODO: open the user records server
+
+        return False, "System error, cannot register new user at present."
 
     def create_db(self, db_name):
         """
@@ -124,14 +133,18 @@ class TingUser(Form):
         return find_user(self.__username) is not None
 
 
-# The set of logged in users
-users_list = {}
+# A cache for the set of logged in users
+__users_list = {}
 
 
-def register_user(user):
-    users_list[user.get_username()] = user
+def register_user_cache(user):
+    __users_list[user.get_username()] = user
+
+
+def remove_user_cache(user):
+    __users_list.pop(user.get_username(), None)
 
 
 def find_user(username):
-    return users_list.get(username, None)
+    return __users_list.get(username, None)
 

@@ -27,14 +27,18 @@ def show_index_page():
     if request.method == 'POST':
         if user.obtain_user_input():
             action_res = False
+            action_str = ""
 
             if "signin" in request.form:
-                action_res = user.do_login()
+                action_res, action_str = user.do_login()
             elif "register" in request.form:
-                action_res = user.do_register()
+                action_res, action_str = user.do_register()
 
             if action_res is True:
                 return redirect("%s/console" % user.get_username())
+            else:
+                # TODO: return the error string to user
+                pass
 
     return render_template("index.html", form=user)
 
@@ -63,6 +67,7 @@ def show_managedb_page(username):
     # We first get the list of URIs
     URIs = plan_query.get_URIs_for_user(username)
     n_uris = len(URIs)
+    print URIs
     return render_template("managedb.html", userName=username, URIs=URIs, n_uris=n_uris)
 
 

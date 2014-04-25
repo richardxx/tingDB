@@ -85,7 +85,9 @@ def get_URIs_for_user(username):
     URIs = []
 
     for plan in plans:
-        uri = tingDB_service.send_request_to_op(plan["_id"], "op-geturi")
+        plan_name = plan["_id"]
+        print plan_name
+        uri = tingDB_service.send_request_to_op(plan_name, "op-geturi")
         URIs.append(uri)
 
     return URIs
